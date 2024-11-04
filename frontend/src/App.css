@@ -1,0 +1,60 @@
+/* App.css */
+body {
+  transition: background-color 0.3s ease;
+}
+
+body.light {
+  background-color: #fef9d9;
+  color: #000; /* Light mode font color */
+}
+
+body.dark {
+  background-color: #001f3f;
+  color: #fff; /* Dark mode font color */
+}
+
+:root {
+  --bg-color-light: #d2e0fb; /* Light Mode Background */
+  --bg-color-dark: #001f3f; /* Dark Mode Background */
+}
+
+html.light {
+  background-color: var(--bg-color-light);
+  color: #000; /* Light Mode Text Color */
+}
+
+html.dark {
+  background-color: var(--bg-color-dark);
+  color: #fff; /* Dark Mode Text Color */
+}
+
+.header {
+  position: fixed;
+  width: 100%;
+  z-index: 100;
+}
+
+.sidebar {
+  position: relative;
+  background-color: var(--bg-color-dark);
+  color: #fff; /* Sidebar text color */
+}
+
+.chat {
+  padding-top: 64px; /* Height of the header */
+  color: #fff; /* Set text color for chat messages */
+}
+
+.chat div {
+  color: #e0e0e0; /* Use a lighter shade for messages in dark mode */
+}
+
+input {
+  width: calc(100% - 100px);
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Add more styles as needed for components */
