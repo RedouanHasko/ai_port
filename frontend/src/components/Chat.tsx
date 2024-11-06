@@ -1,11 +1,20 @@
+// src/components/Chat.tsx
+
 import React, { useState, useEffect, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
+import CodeBlock from "./CodeBlock";
 
 interface ChatProps {
   selectedChat: number | null;
   messages: { text: string; isUser: boolean }[];
   sendMessage: (message: string) => void;
   updateMessage: (index: number, newText: string) => void;
+}
+
+interface MessagePart {
+  type: "text" | "code";
+  content: string;
+  language?: string;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -55,9 +64,60 @@ const Chat: React.FC<ChatProps> = ({
     setEditedMessage("");
   };
 
+  // Helper function to parse message into text and code parts
+  const parseMessage = (text: string): MessagePart[] => {
+    const regex = /```(\w+)?\n([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match;
+    const parts: MessagePart[] = [];
+
+    while ((match = regex.exec(text)) !== null) {
+      // Text before the code block
+      if (match.index > lastIndex) {
+        parts.push({
+          type: "text",
+          content: text.substring(lastIndex, match.index),
+        });
+      }
+
+      // The code block
+      parts.push({
+        type: "code",
+        content: match[2],
+        language: match[1] || "plaintext", // Default to plaintext if no language is specified
+      });
+
+      lastIndex = regex.lastIndex;
+    }
+
+    // Text after the last code block
+    if (lastIndex < text.length) {
+      parts.push({
+        type: "text",
+        content: text.substring(lastIndex),
+      });
+    }
+
+    return parts;
+  };
+
+  // Component to render individual message parts
+  const RenderMessagePart: React.FC<{ part: MessagePart }> = ({ part }) => {
+    if (part.type === "code") {
+      return (
+        <CodeBlock
+          language={part.language || "plaintext"}
+          content={part.content}
+        />
+      );
+    } else {
+      return <span>{part.content}</span>;
+    }
+  };
+
   if (selectedChat === null) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-center h-full text-gray-500 dark:text-white">
         Start a new chat or open a previous one to continue chatting.
       </div>
     );
@@ -85,16 +145,16 @@ const Chat: React.FC<ChatProps> = ({
                 className={`p-3 rounded-lg ${
                   msg.isUser
                     ? "bg-blue-500 text-white text-right"
-                    : "bg-gray-300 dark:bg-gray-700 text-left"
+                    : "bg-gray-300 dark:bg-gray-700 text-left dark:text-white"
                 }`}
               >
                 {editingMessageIndex === index && msg.isUser ? (
                   <div className="flex flex-col">
-                    <input
-                      type="text"
+                    <textarea
                       value={editedMessage}
                       onChange={(e) => setEditedMessage(e.target.value)}
                       className="p-2 bg-gray-200 dark:bg-gray-800 rounded-md text-black dark:text-white w-full mb-2"
+                      rows={4}
                     />
                     <div className="flex justify-end space-x-2">
                       <button
@@ -112,7 +172,10 @@ const Chat: React.FC<ChatProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div>{msg.text}</div>
+                  // Render the message with code blocks if any
+                  parseMessage(msg.text).map((part, idx) => (
+                    <RenderMessagePart key={idx} part={part} />
+                  ))
                 )}
               </div>
             </div>

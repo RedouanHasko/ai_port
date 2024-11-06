@@ -34,7 +34,6 @@ const App = () => {
     localStorage.setItem("chats", JSON.stringify(chats));
   }, [chats]);
 
-  // Fetch models on initial load
   useEffect(() => {
     const fetchModels = async () => {
       try {
@@ -45,7 +44,7 @@ const App = () => {
         const data = await response.json();
         setModels(data.models);
         if (data.models.length > 0) {
-          setSelectedLLM(data.models[0]); // Set the first model as default
+          setSelectedLLM(data.models[0]);
         }
       } catch (error) {
         console.error("Error fetching models:", error);
@@ -81,7 +80,7 @@ const App = () => {
       )
     );
     setToastMessage("Chat renamed successfully!");
-    setToastVisible(true); // Show success message
+    setToastVisible(true);
   };
 
   const handleDeleteChat = (chatId: number) => {
@@ -97,7 +96,7 @@ const App = () => {
       setChatToDelete(null);
       setModalOpen(false);
       setToastMessage("Chat deleted successfully!");
-      setToastVisible(true); // Show success message
+      setToastVisible(true);
     }
   };
 
@@ -111,13 +110,11 @@ const App = () => {
     updatedMessages?: any[]
   ) => {
     if (selectedChat !== null && selectedLLM) {
-      // Add user's message if not provided (i.e., not during editing)
       let updatedChatMessages = updatedMessages;
       if (!updatedMessages) {
         updatedChatMessages = [...messages, { text: message, isUser: true }];
         setMessages(updatedChatMessages);
 
-        // Update the chat in 'chats' state
         setChats((prevChats) =>
           prevChats.map((chat) =>
             chat.id === selectedChat
@@ -130,11 +127,10 @@ const App = () => {
         );
       }
 
-      // Add a placeholder for the LLM's response
       const llmResponseIndex = updatedChatMessages.length;
       setMessages((prev) => [
         ...updatedChatMessages,
-        { text: "", isUser: false }, // Placeholder for LLM's response
+        { text: "", isUser: false },
       ]);
 
       try {
@@ -147,7 +143,7 @@ const App = () => {
             content: message,
             model: selectedLLM,
             history: updatedChatMessages,
-            chat_id: selectedChat, // Include chat_id in the request
+            chat_id: selectedChat,
           }),
         });
 
@@ -166,7 +162,6 @@ const App = () => {
           const chunk = decoder.decode(value);
           llmResponseText += chunk;
 
-          // Update the LLM's response message incrementally
           setMessages((prevMessages) => {
             const newMessages = [...prevMessages];
             newMessages[llmResponseIndex] = {
@@ -177,7 +172,6 @@ const App = () => {
           });
         }
 
-        // Update the chat in 'chats' state with the final LLM response
         setChats((prevChats) =>
           prevChats.map((chat) =>
             chat.id === selectedChat
@@ -199,17 +193,14 @@ const App = () => {
 
   const updateMessage = (index: number, newText: string) => {
     if (selectedChat !== null) {
-      // Update the message in the messages state
       const updatedMessages = messages.map((msg, i) =>
         i === index ? { ...msg, text: newText } : msg
       );
 
-      // Remove LLM responses that come after the edited message
       const truncatedMessages = updatedMessages.slice(0, index + 1);
 
       setMessages(truncatedMessages);
 
-      // Update the chat's messages in the chats state
       setChats((prevChats) =>
         prevChats.map((chat) =>
           chat.id === selectedChat
@@ -221,7 +212,6 @@ const App = () => {
         )
       );
 
-      // Resend the conversation to the LLM starting from the edited message
       const lastUserMessage = truncatedMessages[index].text;
       handleSendMessage(lastUserMessage, truncatedMessages);
     }
@@ -242,7 +232,7 @@ const App = () => {
           onRenameChat={handleRenameChat}
           isOpen={isSidebarOpen}
           selectedChatId={selectedChat}
-          onCloseSidebar={() => setSidebarOpen(false)} // Pass the close function
+          onCloseSidebar={() => setSidebarOpen(false)}
         />
         <div
           className={`flex flex-col flex-1 bg-gray-100 dark:bg-gray-900 transition-all duration-300 ${
@@ -251,13 +241,12 @@ const App = () => {
         >
           <Header toggleSidebar={() => setSidebarOpen((open) => !open)} />
           <div className="flex flex-col flex-1 overflow-hidden">
-            {/* LLM Selection */}
             {models.length > 0 ? (
               <>
                 <div className="p-4">
                   <label
                     htmlFor="llm"
-                    className="text-gray-700 dark:text-gray-300 mr-2"
+                    className="text-gray-700 dark:text-white mr-2"
                   >
                     Choose LLM:
                   </label>
@@ -274,7 +263,6 @@ const App = () => {
                     ))}
                   </select>
                 </div>
-                {/* Chat Area */}
                 <Chat
                   selectedChat={selectedChat}
                   messages={messages}

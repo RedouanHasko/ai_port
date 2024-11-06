@@ -1,2 +1,5 @@
+# backend/.gitignore
+
 .env
-memory.json*
+memory.json
+venv/
